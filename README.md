@@ -18,7 +18,7 @@ Welcome to the documentation for our ToDo Web App. This app allows users to crea
 
 To get started with our ToDo Web App, follow these steps:
 
-1. Clone the repository: `git clone https://github.com/yourusername/todo-web-app.git`
+1. Clone the repository: `git clone https://github.com/Pranil9699/todo-web-app.git`
 2. Navigate to the project directory: `cd todo-web-app`
 3. Open the `index.html` file in your web browser to run the app locally.
 

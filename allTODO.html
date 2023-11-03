@@ -1,0 +1,305 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous"
+    />
+    <style rel="text/css" href="style.css"></style>
+    <title>All To-Do's Page</title>
+  </head>
+  <body>
+    <div id="navbar-container"></div>
+
+    <script>
+      // Function to load and inject the navigation bar
+      function loadNavbar() {
+        fetch("navbar.html")
+          .then((response) => response.text())
+          .then((data) => {
+            document.getElementById("navbar-container").innerHTML = data;
+          });
+      }
+
+      // Call the function to load the navigation bar
+      loadNavbar();
+    </script>
+
+    <div class="container">
+      <h1 class="mt-4 text-center">All TODOs</h1>
+      <ul id="todo-list" class="list-group row">
+        <!-- Your TODO cards go here -->
+      </ul>
+    </div>
+    <button
+      id="pageloaded"
+      onclick="displayAllTODOs()"
+      style="display: none"
+    ></button>
+    <script>
+      // Function to display all TODOs
+      function displayAllTODOs() {
+        const todoList = document.getElementById("todo-list");
+        const todos = JSON.parse(localStorage.getItem("todos")) || [];
+
+        if (todos.length === 0) {
+          // Handle case when there are no TODOs
+          todoList.innerHTML = "<p>No TODOs available.</p>";
+        } else {
+          todoList.innerHTML = ""; // Clear existing content
+          console.log("0");
+
+          for (let i = 0; i < todos.length; i++) {
+            if (i % 3 === 0) {
+              // Create a new row after every 3 cards
+              const row = document.createElement("div");
+              row.className = "row";
+              row.style = "width: 100rem;";
+
+              todoList.appendChild(row);
+            }
+            console.log("1");
+            // Create a card element
+            // if(todos[i].status){
+            //   console.log("empty");
+            // }else{
+            //   console.log("not empty");
+
+            // }
+            const card = document.createElement("div");
+            card.className = ` card col-md-4 mb-3 m-1 ${
+              todos[i].status === "Process"
+                ? "border-warning"
+                : "border-success"
+            }`;
+            console.log("2");
+
+            // Create the card body
+            const cardBody = document.createElement("div");
+            cardBody.className = "card-body";
+
+            // Delete and Update buttons
+            const buttons = document.createElement("div");
+            buttons.className =
+              "d-flex justify-content-between align-items-center";
+
+            // Title in different color
+            const title = document.createElement("h5");
+            title.className = "card-title text-primary";
+            title.innerText = todos[i].title;
+
+            // Content in different color
+            const content = document.createElement("p");
+            content.className = "card-text text-info";
+            content.innerText = todos[i].content;
+
+            // Date in the top right corner
+            const date = document.createElement("p");
+            date.className = "card-text text-muted";
+            date.style.position = "absolute";
+            date.style.top = "0";
+            date.style.right = "0";
+            date.innerText = `${todos[i].date_month + 1}/${todos[i].date_day}/${
+              todos[i].date_year
+            }`;
+
+            // Delete button
+            const deleteButton = document.createElement("button");
+            deleteButton.className = "btn btn-danger btn-sm";
+            deleteButton.innerText = "Delete";
+            deleteButton.onclick = function () {
+              // Extract all TODOs from localStorage into an object
+              const todosObject =
+                JSON.parse(localStorage.getItem("todos")) || {};
+
+              // Convert the index (i) to a string to identify the TODO
+              const todoId = i.toString();
+
+              // Check if the TODO exists in localStorage
+              if (todosObject.hasOwnProperty(todoId)) {
+                // Remove the specific TODO from the object
+                delete todosObject[todoId];
+
+                // Create an array to store the remaining TODOs
+                const todosArray = Object.values(todosObject);
+
+                // Update the localStorage with the array of remaining TODOs
+                localStorage.setItem("todos", JSON.stringify(todosArray));
+                console.log("other +" + localStorage.getItem("todos"));
+                // Refresh the display
+                displayAllTODOs();
+              }
+            };
+
+            // Status button
+            const statusButton = document.createElement("button");
+            statusButton.className = "btn";
+
+            if (todos[i].status === "Done") {
+              statusButton.className += " btn-secondary"; // Add secondary class for a disabled look
+              statusButton.innerText = "Done";
+              statusButton.disabled = true; // Disable the button
+            } else {
+              statusButton.className += " btn-primary"; // Add primary class for an enabled look
+              statusButton.innerText = "Process";
+              statusButton.onclick = function () {
+                // Change the status to "Done" and update the TODO
+                todos[i].status = "Done";
+
+                // Update the TODO in localStorage
+                localStorage.setItem("todos", JSON.stringify(todos));
+
+                // Refresh the display
+                displayAllTODOs();
+              };
+            }
+
+            // Rest of the code remains the same
+
+            // Update button
+            const updateButton = document.createElement("button");
+            updateButton.className = "btn btn-primary btn-sm";
+            updateButton.innerText = "Update";
+            // Update button click handler
+updateButton.onclick = function () {
+  // Populate the modal fields with TODO data
+  const updateTitleField = document.getElementById("updateTitle");
+  const updateContentField = document.getElementById("updateContent");
+  const updateStatusField = document.getElementById("updateStatus");
+
+  updateTitleField.value = todos[i].title;
+  updateContentField.value = todos[i].content;
+  updateStatusField.value = todos[i].status;
+
+  // Show the modal
+  $('#updateModal').modal('show');
+
+  // Handle the updateTodo button click inside the modal
+  document.getElementById("updateTodo").onclick = function () {
+    // Update the TODO data from the modal fields
+    todos[i].title = updateTitleField.value;
+    todos[i].content = updateContentField.value;
+    todos[i].status = updateStatusField.value;
+
+    // Update the TODO in localStorage
+    localStorage.setItem("todos", JSON.stringify(todos));
+
+    // Hide the modal
+    $('#updateModal').modal('hide');
+
+    // Refresh the display
+    displayAllTODOs();
+  };
+};
+
+
+            buttons.appendChild(deleteButton);
+            buttons.appendChild(statusButton);
+            buttons.appendChild(updateButton);
+
+            cardBody.appendChild(title);
+            cardBody.appendChild(content);
+            cardBody.appendChild(buttons);
+            card.appendChild(cardBody);
+            card.appendChild(date);
+
+            // Append the card to the row
+            todoList.lastChild.appendChild(card);
+          }
+        }
+      }
+
+      // Automatically trigger the button click
+      window.onload = (event) => {
+        console.log("page is fully loaded");
+        const button = document.getElementById("pageloaded");
+        if (button) {
+          console.log("Clicked...");
+          button.click();
+        }
+      };
+      
+    </script>
+<div class="modal" id="updateModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Update TODO</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Form fields for updating TODO -->
+        <div class="form-group">
+          <label for="updateTitle">Title</label>
+          <input type="text" class="form-control" id="updateTitle">
+        </div>
+        <div class="form-group">
+          <label for="updateContent">Content</label>
+          <textarea class="form-control" id="updateContent" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="updateStatus">Status</label>
+          <select class="form-control" id="updateStatus">
+            <option value="Process">Process</option>
+            <option value="Done">Done</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="updateTodo">Update</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script
+      src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+      integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
+      integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
+      integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+      crossorigin="anonymous"
+    ></script>
+
+    <div id="footer-container"></div>
+
+    <script>
+      // Function to load and inject the navigation bar
+      function loadFooter() {
+        fetch("footer.html")
+          .then((response) => response.text())
+          .then((data) => {
+            document.getElementById("footer-container").innerHTML = data;
+          });
+      }
+
+      // Call the function to load the navigation bar
+      loadFooter();
+    </script>
+
+    <script src="script.js"></script>
+  </body>
+</html>
